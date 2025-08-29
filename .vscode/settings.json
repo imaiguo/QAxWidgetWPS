@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "qwidget": "cpp",
+        "qlabel": "cpp",
+        "chrono": "cpp",
+        "xlocale": "cpp",
+        "qapplication": "cpp"
+    }
+}
