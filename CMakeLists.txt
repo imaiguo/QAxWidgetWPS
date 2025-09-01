@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.31)
 
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-set(APPNAME "RoundLabel")
+set(APPNAME "QAxWidgetWPS")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,11 +22,13 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS network REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WebEngineWidgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WebChannel REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS AxContainer REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS AxServer)
 
 message("current Qt version is[" ${QT_VERSION_MAJOR}  "]")
 
 set(SRC
     src/Main.cpp
+    src/MainWindow.cpp
 )
 
 add_executable(${APPNAME}
@@ -39,4 +41,5 @@ target_link_libraries(${APPNAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::WebEngineWidgets
         Qt${QT_VERSION_MAJOR}::WebChannel
         Qt${QT_VERSION_MAJOR}::AxContainer
+        Qt${QT_VERSION_MAJOR}::AxServer
 )

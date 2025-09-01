@@ -9,3 +9,7 @@
 ```
 
 ## 参考 https://doc.qt.io/qt-6/qaxwidget.html
+
+- Windows下实现对wps的二次开发 https://ask.csdn.net/questions/8602835
+
+- https://doc.qt.io/qt-6/activeqt-index.html
