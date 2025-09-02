@@ -13,16 +13,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "D:/devtools/Qt.6.9.1/lib/cmake")
+# set(CMAKE_PREFIX_PATH "D:/devtools/Qt.6.9.1/static/lib/cmake")
+
 
 project(${APPNAME} LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS network REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WebEngineWidgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WebChannel REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS AxContainer REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS AxServer)
 
 message("current Qt version is[" ${QT_VERSION_MAJOR}  "]")
 
@@ -32,15 +31,12 @@ set(SRC
     icon.rc
 )
 
-add_executable(${APPNAME}
+add_executable(${APPNAME} WIN32
     ${SRC}
 )
 
 target_link_libraries(${APPNAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Network
-        Qt${QT_VERSION_MAJOR}::WebEngineWidgets
-        Qt${QT_VERSION_MAJOR}::WebChannel
         Qt${QT_VERSION_MAJOR}::AxContainer
-        Qt${QT_VERSION_MAJOR}::AxServer
 )
