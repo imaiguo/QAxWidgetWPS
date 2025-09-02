@@ -9,10 +9,13 @@ class MainWindow : public QWidget{
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void initUI();
+    bool initUI();
     void moveEvent(QMoveEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void showEvent(QShowEvent *event) override;
+
+private:
+    void SetWps();
 
 private:
     QAxWidget* m_axWdiget = nullptr;

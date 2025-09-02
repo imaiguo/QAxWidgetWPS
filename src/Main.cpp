@@ -16,7 +16,11 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     MainWindow window;
-    window.initUI();
+    window.setWindowTitle("实验报告助手");
+    if(!window.initUI()){
+        return -1;
+    }
+
     window.show();
 
     // QWidget window;

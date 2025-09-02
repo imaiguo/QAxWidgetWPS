@@ -29,6 +29,7 @@ message("current Qt version is[" ${QT_VERSION_MAJOR}  "]")
 set(SRC
     src/Main.cpp
     src/MainWindow.cpp
+    icon.rc
 )
 
 add_executable(${APPNAME}

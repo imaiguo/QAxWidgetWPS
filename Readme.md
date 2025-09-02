@@ -8,8 +8,11 @@
 >
 ```
 
-## 参考 https://doc.qt.io/qt-6/qaxwidget.html
+## 参考 
 
-- Windows下实现对wps的二次开发 https://ask.csdn.net/questions/8602835
-
-- https://doc.qt.io/qt-6/activeqt-index.html
+- Active Qt https://doc.qt.io/qt-6/activeqt-index.html
+- QAxWidget Class https://doc.qt.io/qt-6/qaxwidget.html
+- WPS二次开发 https://gitee.com/zouyf/wps/tree/master
+- C++ WPS二次开发资料汇总 https://gitcode.com/open-source-toolkit/54081 https://blog.csdn.net/gitblog_09705/article/details/142949698
+- Qt/C++操作word文档 https://blog.csdn.net/weixin_42214392/article/details/141925713
+- Qt窗口内嵌Word，PPT，Excel https://blog.csdn.net/a379039233/article/details/122838893
