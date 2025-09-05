@@ -11,13 +11,12 @@
 #pragma comment(lib,"comsupp.lib")
 
 int main(int argc, char *argv[]) {
-    // CoInitialize(NULL);
-    // CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
     QApplication a(argc, argv);
 
+    a.setStyleSheet("QPushButton { border-width: 2px; border-color: black; background: beige; }");
+
     MainWindow window;
-    window.setWindowTitle("实验报告助手");
+    window.setWindowTitle("WPS助手");
     if(!window.initUI()){
         return -1;
     }

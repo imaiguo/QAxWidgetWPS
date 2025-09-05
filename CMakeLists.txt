@@ -28,6 +28,7 @@ message("current Qt version is[" ${QT_VERSION_MAJOR}  "]")
 set(SRC
     src/Main.cpp
     src/MainWindow.cpp
+    src/FunctionWidget.cpp
     icon.rc
 )
 
@@ -40,3 +41,5 @@ target_link_libraries(${APPNAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::AxContainer
 )
+
+file(COPY doc/测试文档.docx DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/doc)
