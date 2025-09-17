@@ -37,6 +37,11 @@ bool FunctionWidget::initUI(){
     m_AddPicture ->setText("插入图片");
     m_AddPicture->move(10, height);
 
+    height += 30;
+    m_FunctionInvoke = new QPushButton(this);
+    m_FunctionInvoke ->setText("功能调用");
+    m_FunctionInvoke->move(10, height);
+
     addConnection();
 
     return true;
@@ -48,4 +53,5 @@ void FunctionWidget::addConnection(){
     connect(m_ShowCatalog, &QPushButton::clicked, this, [&]()-> void { emit ShowCatalog();});
     connect(m_StringReplace, &QPushButton::clicked, this, [&]()-> void { emit StringReplace();});
     connect(m_AddPicture, &QPushButton::clicked, this, [&]()-> void { emit AddPicture();});
+    connect(m_FunctionInvoke, &QPushButton::clicked, this, [&]()-> void { emit FunctionInvoke();});
 }

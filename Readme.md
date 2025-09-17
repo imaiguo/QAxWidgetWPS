@@ -9,7 +9,15 @@
 >
 ```
 
-## 参考 
+## SDK功能测试
+
+- Application
+
+
+
+
+
+## 参考
 
 - Active Qt https://doc.qt.io/qt-6/activeqt-index.html
 - QAxWidget Class https://doc.qt.io/qt-6/qaxwidget.html
@@ -17,3 +25,5 @@
 - C++ WPS二次开发资料汇总 https://gitcode.com/open-source-toolkit/54081 https://blog.csdn.net/gitblog_09705/article/details/142949698
 - Qt/C++操作word文档 https://blog.csdn.net/weixin_42214392/article/details/141925713
 - Qt窗口内嵌Word，PPT，Excel https://blog.csdn.net/a379039233/article/details/122838893
+- 使用VS2008通过C++在WPS文档中添加内容的实践指南 https://blog.csdn.net/weixin_30798867/article/details/147543302
+- "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\ksaddndr.dll"

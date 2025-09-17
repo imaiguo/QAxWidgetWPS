@@ -99,6 +99,7 @@ void MainWindow::addConnection(){
     connect(m_Funtion, &FunctionWidget::ShowCatalog, this, &MainWindow::onShowCatalog);
     connect(m_Funtion, &FunctionWidget::StringReplace, this, &MainWindow::onStringReplace);
     connect(m_Funtion, &FunctionWidget::AddPicture, this, &MainWindow::onAddPicture);
+    connect(m_Funtion, &FunctionWidget::FunctionInvoke, this, &MainWindow::onFunctionInvoke);
 }
 
 void MainWindow::onNew(){
@@ -126,16 +127,20 @@ void MainWindow::onShowCatalog(){
 }
 
 void MainWindow::onStringReplace(){
-    QMessageBox::information(this, "提示", "onStringReplace", QMessageBox::Ok);
-    // qDebug() << "onStringReplace called.";
-    // QAxObject* sections =  m_Document->querySubObject("Sections");
-    // qDebug() << sections->isNull();
-    // QAxObject* section = sections->querySubObject("Count");
-    // long c = section->asVariant().toLongLong();
-    // qDebug () << section->isNull();
-    // section->dynamicCall("Find(const QString&, const QString&, const QString&)", "测试", "Goodbye", "wpsReplaceAll");
+    // 返回文档中的选定范围或插入点，若文档中没有所选内容，则代表插入点。
+    QAxObject* selection = m_axWdiget->querySubObject("Selection");
+    selection->dynamicCall("TypeText(const QString&)", "花间一壶酒，独酌无相亲。举杯邀明月，对影成三人。");
+
+    // 0 wpsWindowStateNormal 正常
+    // 1 wpsWindowStateMaximize 最大化 
+    // 2 wpsWindowStateMinimize 最小化
+    // m_axWdiget->setProperty("WindowState", 2);      // 最小化
 }
 
 void MainWindow::onAddPicture(){
     QMessageBox::information(this, "提示", "onAddPicture", QMessageBox::Ok);
+}
+
+void MainWindow::onFunctionInvoke(){
+    QMessageBox::information(this, "提示", "onFunctionInvoke", QMessageBox::Ok);
 }

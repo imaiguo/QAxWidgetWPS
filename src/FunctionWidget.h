@@ -19,6 +19,7 @@ signals:
     void ShowCatalog();
     void StringReplace();
     void AddPicture();
+    void FunctionInvoke();
 
 private:
     void addConnection();
@@ -29,4 +30,6 @@ private:
     QPushButton * m_ShowCatalog;
     QPushButton * m_StringReplace;
     QPushButton * m_AddPicture;
+    QPushButton * m_FunctionInvoke;
 };
+

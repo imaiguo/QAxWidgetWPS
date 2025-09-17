@@ -35,4 +35,5 @@ public slots:
     void onShowCatalog();
     void onStringReplace();
     void onAddPicture();
+    void onFunctionInvoke();
 };
