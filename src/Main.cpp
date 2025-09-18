@@ -10,6 +10,10 @@
 
 #pragma comment(lib,"comsupp.lib")
 
+// #import "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\ksaddndr.dll" no_namespace, raw_interfaces_only
+
+// #import "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\wpscore.dll"
+
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 

@@ -17,6 +17,15 @@
 
 
 
+## 注册ocx控件
+
+```bash
+> regsvr32 ksaddndr.dll
+> regsvr32 /u ksaddndr.dll
+>
+```
+
+
 ## 参考
 
 - Active Qt https://doc.qt.io/qt-6/activeqt-index.html
@@ -27,3 +36,6 @@
 - Qt窗口内嵌Word，PPT，Excel https://blog.csdn.net/a379039233/article/details/122838893
 - 使用VS2008通过C++在WPS文档中添加内容的实践指南 https://blog.csdn.net/weixin_30798867/article/details/147543302
 - "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\ksaddndr.dll"
+- "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\wppcore.dll"
+- Qt调用OCX控件详解 https://www.freesion.com/article/58432624174
+- QAxBase Class https://doc.qt.io/qt-6/zh/qaxbase.html

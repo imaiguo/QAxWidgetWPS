@@ -25,6 +25,8 @@ private:
     QAxWidget* m_axWdiget = nullptr;
     QAxObject* m_Documents = nullptr;
     QAxObject* m_Document = nullptr;
+    QAxObject* m_Selection = nullptr;
+
     QWidget* m_widgetContainer = nullptr;
     FunctionWidget *m_Funtion = nullptr;
     HWND m_hWps;

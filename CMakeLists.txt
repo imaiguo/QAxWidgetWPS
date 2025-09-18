@@ -43,3 +43,4 @@ target_link_libraries(${APPNAME} PRIVATE
 )
 
 file(COPY doc/测试文档.docx DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/doc)
+file(COPY image/setpasswd.png DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/image)
