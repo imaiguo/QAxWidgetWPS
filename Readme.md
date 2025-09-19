@@ -39,3 +39,5 @@
 - "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\wppcore.dll"
 - Qt调用OCX控件详解 https://www.freesion.com/article/58432624174
 - QAxBase Class https://doc.qt.io/qt-6/zh/qaxbase.html
+- https://blog.csdn.net/ribavnu/article/details/51437052
+- Virtual-Key 代码 https://learn.microsoft.com/zh-cn/windows/win32/inputdev/virtual-key-codes

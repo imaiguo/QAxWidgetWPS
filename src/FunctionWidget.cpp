@@ -29,7 +29,7 @@ bool FunctionWidget::initUI(){
 
     height += 30;
     m_StringReplace = new QPushButton(this);
-    m_StringReplace ->setText("字符替换");
+    m_StringReplace ->setText("插入字符");
     m_StringReplace->move(10, height);
 
     height += 30;

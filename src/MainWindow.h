@@ -35,7 +35,7 @@ public slots:
     void onNew();
     void onOpen();
     void onShowCatalog();
-    void onStringReplace();
+    void onTypeText();
     void onAddPicture();
     void onFunctionInvoke();
 };
