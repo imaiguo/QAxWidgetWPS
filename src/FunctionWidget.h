@@ -16,8 +16,11 @@ public:
 signals:
     void New();
     void Open();
-    void ShowCatalog();
+
+    void AddHeadFoot();
+    void AddTable();
     void StringReplace();
+    void StringInsert();
     void AddPicture();
     void FunctionInvoke();
 
@@ -27,9 +30,12 @@ private:
 private:
     QPushButton * m_New;
     QPushButton * m_Open;
-    QPushButton * m_ShowCatalog;
+    QPushButton * m_AddTable;
+    QPushButton * m_StringInsert;
     QPushButton * m_StringReplace;
     QPushButton * m_AddPicture;
+    QPushButton * m_AddHeadFoot;
+    
     QPushButton * m_FunctionInvoke;
 };
 

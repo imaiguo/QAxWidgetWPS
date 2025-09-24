@@ -1,4 +1,6 @@
+
 #include "MainWindow.h"
+#include "Tools.h"
 
 #include <QAxObject>
 #include <QMessageBox>
@@ -30,13 +32,11 @@ bool MainWindow::initUI(){
     }
     // SetParent(m_hWps, (HWND)winId());
 
-    QWindow* window = QWindow::fromWinId((WId)m_hWps);
     m_axWdiget->setProperty("Visible", true);
     m_axWdiget->setProperty("DisplayAlerts", false); 
 
     ShowWindow(m_hWps, SW_MAXIMIZE);
 
-    m_widgetContainer = QWidget::createWindowContainer(window, this);
     m_Funtion = new FunctionWidget(this);
     m_Funtion->initUI();
     m_Funtion->setFixedSize(ChildWidth, size().height() - Padding*2);
@@ -47,8 +47,25 @@ bool MainWindow::initUI(){
 
     onNew();
 
-    // 1. 获取当前文档选择范围/插入点
-    m_Selection = m_axWdiget->querySubObject("Selection");
+    // 自动显示 目录导航
+    // ShowWpsNavigation(m_hWps);
+    // Sleep(200);
+
+    // 获取当前文档选择范围/插入点
+
+    // QWindow* window = QWindow::fromWinId((WId)m_hWps);
+    m_widgetContainer = QWidget::createWindowContainer(QWindow::fromWinId((WId)m_hWps), this);
+
+    // // 全屏显示
+    // QAxObject* window = m_axWdiget->querySubObject("ActiveWindow");
+    // qDebug() << "window->" << window;
+    // QAxObject* pane = window->querySubObject("ActivePane");
+    // qDebug() << "pane->" << pane;
+    // QAxObject* view = pane->querySubObject("View");     
+    // qDebug() << "view->" << view;
+    // view->setProperty("FullScreen", true);
+
+    // setWpsFloatButtonHide();
 
     return true;
 }
@@ -104,16 +121,19 @@ void MainWindow::SetWps(){
 void MainWindow::addConnection(){
     connect(m_Funtion, &FunctionWidget::New, this, &MainWindow::onNew);
     connect(m_Funtion, &FunctionWidget::Open, this, &MainWindow::onOpen);
-    connect(m_Funtion, &FunctionWidget::ShowCatalog, this, &MainWindow::onShowCatalog);
-    connect(m_Funtion, &FunctionWidget::StringReplace, this, &MainWindow::onTypeText);
+    connect(m_Funtion, &FunctionWidget::AddTable, this, &MainWindow::onAddTable);
+    connect(m_Funtion, &FunctionWidget::StringInsert, this, &MainWindow::onTypeText);
+    connect(m_Funtion, &FunctionWidget::StringReplace, this, &MainWindow::onStringReplace);
     connect(m_Funtion, &FunctionWidget::AddPicture, this, &MainWindow::onAddPicture);
     connect(m_Funtion, &FunctionWidget::FunctionInvoke, this, &MainWindow::onFunctionInvoke);
+    connect(m_Funtion, &FunctionWidget::AddHeadFoot, this, &MainWindow::onAddHeadFoot);
 }
 
 void MainWindow::onNew(){
     qDebug() << "MainWindow::onNew";
     m_Documents->querySubObject("Close(const QString&)", "wpsDoNotSaveChanges");
     m_Document = m_Documents->querySubObject("Add");
+    m_Selection = m_axWdiget->querySubObject("Selection");
 }
 
 void MainWindow::onOpen(){
@@ -123,110 +143,115 @@ void MainWindow::onOpen(){
     qDebug() << "applicationDirPath=" << tmpPath;
     tmpPath.append("/doc/测试文档.docx");
     m_Document = m_Documents->querySubObject("Open(const QString&)", tmpPath);
+    m_Selection = m_axWdiget->querySubObject("Selection");
 }
 
-void ListChild(HWND parent, QString split){
-    HWND child = FindWindowEx(parent, NULL, NULL, NULL);
-    do{
-        if( child != nullptr){
-            qDebug() << split << child;
-            QString splittmp = split + "-";
-            ListChild(child, splittmp);
+void MainWindow::onAddTable(){
+    QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+    qDebug() << doc;
+    QAxObject* tables = doc->querySubObject("Tables");
+    qDebug() << tables;
+    m_Selection->dynamicCall("TypeParagraph");
+    // Range 代表文档中的一个连续范围
+    QAxObject* rangetable = m_Selection->querySubObject("Range");
+    // 10行3列 defaultBehavior(1),AutoFitBehavior(2);//后一个2换成1,表格就变密集了
+    // DefaultTableBehavior Variant 类型，可选。设置一个值，来指定 Wps Word 是否要根据单元格中的内容自动调整表格单元格的大小（“自动调整”功能）。
+    // AutoFitBehavior Variant 类型，可选。该属性用于设置 Word 调整表格大小的“自动调整”规则。
+    int row = 10, colum = 3;
+    QStringList headers = {"序号", "姓名", "性别"};
+    QStringList names = {"张三", "李四", "王五", "赵某", "钱某", "孙某", "李某", "周某", "吴某", "郑某"};
+    QStringList sexs = {"男", "女"};
+    if( rangetable != nullptr){
+        QVariant v1(1), v2(2);
+        tables->dynamicCall("Add(const QVariant &, int, int, const QVariant &, const QVariant &)", rangetable->asVariant(), row+1, colum, v1, v2);
+    
+        // 添加表头
+        for( QString tmp: headers){
+            // Range 代表文档中的一个连续范围
+            QAxObject* range = m_Selection->querySubObject("Range");
+            range->setProperty("Bold", true);
+
+            // QAxObject* font = m_Selection->querySubObject("Font");
+            // font->setProperty("Bold", true);
+
+            m_Selection->dynamicCall("TypeText(const QString&)", tmp);
+            m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+
+            // 1表示单元格 1表示一个单位 0表示wpsMove 
+            m_Selection->dynamicCall("MoveRight(int, int, int)", 1, 1, 0);
         }
-        HWND tmp = FindWindowEx(parent, child, NULL, NULL);
-        child = tmp;
-    }while(child != nullptr);
-}
 
-void MainWindow::onShowCatalog(){
-    qDebug() << "MainWindow::onShowCatalog";
-
-    // 1. 遍历所有子窗口, 找出窗口名字为DocView的窗口
-    qDebug() << m_hWps;
-    ListChild(m_hWps, "-");
-
-
-
-    // QWindow* widget = QWindow::fromWinId((WId)m_hWps)->findChild<QWindow*>("DocView");
-    // qDebug() << widget;
-    // qDebug() << widget->winId();
-
-    // QMessageBox::information(this, "提示", "onShowCatalog", QMessageBox::Ok);
-    // With Selection.Find
-    //     .Text = "Hello"
-    //     .Replacement.Text = "Goodbye"
-    //     .Execute Replace:=wpsReplaceAll
-
-    // 左侧展示：alt+w,d,e
-    // 右侧展示：alt+w,d,r
-    // 隐藏：alt+w,d,v
-
-    // HWND id = (HWND)m_axWdiget->winId();
-    // VK_A - VK_Z are the same as ASCII 'A' - 'Z' (0x41 - 0x5A)
-    // qDebug() << m_hWps;
-
-    // PostMessage(m_hWps, WM_SYSKEYDOWN, VK_MENU, 0);
-    // // PostMessage(m_hWps,WM_SYSKEYDOWN,0x41,0);
-    // Sleep(50);
-    // // PostMessage(m_hWps,WM_SYSKEYUP,0x41,0);
-    // PostMessage(m_hWps, WM_SYSKEYUP, VK_MENU, 0);
-
-    // setforegroundwindow(hWnd)
-    // ::SetForegroundWindow(m_hWps);
-    // ::PostMessage(m_hWps, WM_KEYDOWN, MAKEWPARAM(VK_LMENU, 0), NULL);
-    // ::PostMessage(m_hWps, WM_KEYUP, MAKEWPARAM(VK_LMENU, 0), NULL);
-
-    // ::PostMessage(m_hWps, WM_KEYDOWN, MAKEWPARAM(VK_MENU, 0), NULL);
-    // Sleep(50);
-    // ::PostMessage(m_hWps, WM_KEYUP, MAKEWPARAM(VK_MENU, 0), NULL);
-
-
-    // SendMessage(m_hWps, 0x0104, 0x00000012, 0x20380001);
-    // SendMessage(m_hWps, 0x0105, 0x00000012, 0xC0380001);//(0x00000012 == VK_MENU(ALT键))
-
-
-
-    // PostMessage(m_hWps, WM_KEYDOWN, VK_MENU, 0);
-    // // PostMessage(m_hWps,WM_SYSKEYDOWN,0x41,0);
-    // Sleep(50);
-    // // PostMessage(m_hWps,WM_SYSKEYUP,0x41,0);
-    // PostMessage(m_hWps, WM_KEYUP, VK_MENU, 0);
-
-
-    // 当值为1时表示ALT键被按下！这不正是我需要的吗？于是把29位设置为1,函数调用变成
-    // 经过测试，发现这个就是Alt+A的效果
-    // PostMessage(hWnd,WM_SYSKEYDOWN,0x41,1<<29);
-
-
-    // SendMessage(m_hWps, WM_SYSKEYDOWN, 0x44, 0);
-    // Sleep(50);
-    // SendMessage(m_hWps, WM_SYSKEYUP, 0x44, 0);
-    // SendMessage(m_hWps, WM_SYSKEYDOWN, 0x45, 0);
-    // Sleep(50);
-    // SendMessage(m_hWps, WM_SYSKEYUP, 0x45, 0);
-
-    // PostMessage(m_hWps,WM_SYSKEYDOWN,0x41,1<<29);
-
-    // QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_W, Qt::AltModifier);
-    // QKeyEvent keyRelease(QEvent::KeyRelease, Qt::Key_W, Qt::AltModifier);
-
-    // QWidget *w = QWidget::find((WId)m_hWps);
-    // qDebug() <<w;
-    // QCoreApplication::sendEvent(w, &keyPress);
-    // QCoreApplication::sendEvent(w, &keyRelease);
+        // 添加表主题内容
+        for(int i = 0; i < row; i++){
+            // 4表示表格行 1表示一个单位 0表示wpsMove 
+            m_Selection->dynamicCall("MoveDown(int, int, int)", 4, 1, 0);
+            for( int j=0; j < colum; j++){
+                QString value = "";
+                if( 0 == j)
+                    value = std::to_string(i+1).c_str();
+                if( 1 == j)
+                    value = names.at(i); 
+                if( 2 == j){
+                    value = sexs.at(j%2);
+                }
+  
+                m_Selection->dynamicCall("TypeText(const QString&)", value);
+                m_Selection->dynamicCall("MoveRight(int, int, int)", 1, 1, 0);
+            }
+        }
+        m_Selection->dynamicCall("MoveDown(int, int, int)", 4, 1, 0);
+        m_Selection->dynamicCall("MoveDown(int, int, int)", 5, 1, 0);
+    }
 }
 
 void MainWindow::onTypeText(){
-    qDebug() << "MainWindow::onStringReplace";
+ QAxObject* font = m_Selection->querySubObject("Font");
+    qDebug() << font;
+    font->setProperty("Size", 10);
+    font->setProperty("Name", "幼圆");
+    // font->setProperty("Name", "黑体");
+    // BGR
+    font->setProperty("Color", 0xFF0000);
+    // 添加下划线
+    font->setProperty("Underline", true);
+
     m_Selection->dynamicCall("TypeParagraph");
-    m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
-    QString txt = "花间一壶酒，独酌无相亲。举杯邀明月，对影成三人。";
-    m_Selection->dynamicCall("TypeText(const QString&)", txt);
+    // 获取选择区域 Range不适用段落 代表文档中的一个连续范围
+    // QAxObject* range = m_Selection->querySubObject("Range");
+    // range->setProperty("Bold", true);
+    QStringList poem = {
+        "李白《月下独酌·其一》",
+        "花间一壶酒，独酌无相亲。",
+        "举杯邀明月，对影成三人。",
+        "月既不解饮，影徒随我身。",
+        "暂伴月将影，行乐须及春。",
+        "我歌月徘徊，我舞影零乱。",
+        "醒时同交欢，醉后各分散。",
+        "永结无情游，相期邈云汉。"
+    };
+
+    // QString txt = "从明天起，做一个幸福的人。喂马，劈柴，周游世界。从明天起，关心粮食和蔬菜。我有一所房子，面朝大海，春暖花开。";
+    for(QString tmp: poem){
+        m_Selection->dynamicCall("TypeText(const QString&)", tmp);
+    }
+
+
+    // ParagraphFormat
+    QAxObject* paragraphformat = m_Selection->querySubObject("ParagraphFormat");
+    // 0 靠左对齐 1剧中对齐 2 靠右对齐
+    paragraphformat->setProperty("Alignment", 0);
+    // 段落缩进2个字符
+    paragraphformat->dynamicCall("IndentFirstLineCharWidth(int)", 2);
+
+    // 字体还原
+    font->setProperty("Color", 0x000000);
+    font->setProperty("Underline", false);
 }
 
 void MainWindow::onAddPicture(){
     qDebug() << "MainWindow::onAddPicture";
     m_Selection->dynamicCall("TypeParagraph");
+    // 居中对齐
     m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
 
     QString tmpPath = QCoreApplication::applicationDirPath();
@@ -251,6 +276,80 @@ void MainWindow::onAddPicture(){
     }
 }
 
+void MainWindow::onAddHeadFoot(){
+    // 6. 设置页眉页脚
+    QAxObject* window = m_axWdiget->querySubObject("ActiveWindow");
+    qDebug() << "window->" << window;
+    QAxObject* pane = window->querySubObject("ActivePane");
+    qDebug() << "pane->" << pane;
+    QAxObject* view = pane->querySubObject("View");     
+    qDebug() << "view->" << view;
+
+    // 进入设置页眉视图
+    view->setProperty("SeekView", 9);
+    // 居中对齐
+    m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+    QString txt = "研发中心编制";
+    m_Selection->dynamicCall("TypeText(const QString&)", txt);
+    // 进入正文编辑
+    view->setProperty("SeekView", 0);
+
+    // 进入设置页脚视图
+    view->setProperty("SeekView", 10);
+    // 居中对齐
+    m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+    m_Selection->dynamicCall("TypeText(const QString&)", "-");
+    QAxObject* fields = m_Document->querySubObject("Fields");
+    QAxObject* range = m_Selection->querySubObject("Range");
+    fields->dynamicCall("Add(const QVariant &, int, const QString&, bool)", range->asVariant(), 33, "PAGE ", FALSE);
+    m_Selection->dynamicCall("TypeText(const QString&)", "-");
+    // 进入正文编辑
+    view->setProperty("SeekView", 0);
+}
+
+void MainWindow::onStringReplace(){
+    
+    QVariant name = m_Document->property("FullName");
+    qDebug() << name.toString();
+    QAxObject* find = m_Selection->querySubObject("Find");
+
+    // 方法1 循环查找
+    find->setProperty("Text", "待替换文字");
+    find->setProperty("MatchCase", false);
+    find->setProperty("MatchWholeWord", false);
+    // 如果查找操作向前搜索，则本属性为 True。如果向后搜索，则本属性为 False
+    find->setProperty("Forward", true);
+
+    QVariant result = find->dynamicCall("Execute()");
+    if(result.toBool()){
+        m_Selection->dynamicCall("TypeText(const QString&)", "大家好");
+    }
+
+    // // 方法2 14个参数
+    // // Execute(FindText, MatchCase, MatchWholeWord, MatchWildcards, MatchSoundsLike, MatchAllWordForms, Forward, Format, ReplaceWith, Replace, MatchKashida, MatchDiacritics, MatchAlefHamza, MatchControl)
+    // QList<QVariant> vars;
+    // QAxObject* replace = find->querySubObject("Replacement");
+    // replace->setProperty("Text", "大家好");
+    // vars.append(QVariant("待替换文字"));//FindText
+    // vars.append(QVariant(false));//MatchCase
+    // vars.append(QVariant(false));//MatchWholeWord
+    // vars.append(QVariant(false));//MatchWildcards
+    // vars.append(QVariant(false));//MatchSoundsLike
+    // vars.append(QVariant(false));//MatchAllWordForms
+    // vars.append(QVariant(true));//Forward
+    // vars.append(QVariant(false));//Format
+    // // vars.append(QVariant("大家好"));//ReplaceWith
+    // vars.append(replace->asVariant());//ReplaceWith
+    
+    // vars.append(QVariant(3));//Replace 0不替换
+    // vars.append(QVariant(false));//MatchKashida
+    // vars.append(QVariant(false));//MatchDiacritics
+    // vars.append(QVariant(false));//MatchAlefHamza
+    // vars.append(QVariant(false));//MatchControl
+    // QVariant result = find->dynamicCall("Execute(const QString&, bool, bool, bool, bool, bool, bool, bool, const QVariant &, int, bool, bool, bool, bool)", vars);
+    // qDebug() << result.toBool();
+}
+
 void MainWindow::onFunctionInvoke(){
     qDebug() << "MainWindow::onFunctionInvoke";
     
@@ -260,36 +359,96 @@ void MainWindow::onFunctionInvoke(){
     // wpsWindowStateMinimize 最小化 2
     // m_axWdiget->setProperty("WindowState", 2);      // 最小化
 
-    // 2. 在选定内容或插入点插入指定的文本
-    m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
-    QString txt = "花间一壶酒，独酌无相亲。举杯邀明月，对影成三人。";
-    m_Selection->dynamicCall("TypeText(const QString&)", txt);
+    // // 2. 在选定内容或插入点插入指定的文本
+    // m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+    // QString txt = "花间一壶酒，独酌无相亲。举杯邀明月，对影成三人。";
+    // m_Selection->dynamicCall("TypeText(const QString&)", txt);
 
-    // 3 插入段落 TypeParagraph 方法与 Enter（回车键）的功能相同。
-    m_Selection->dynamicCall("TypeParagraph");
-    m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+    // // 3 插入段落 TypeParagraph 方法与 Enter（回车键）的功能相同。
+    // m_Selection->dynamicCall("TypeParagraph");
+    // m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
    
-    // 4.  文档中插入图片
-    QString tmpPath = QCoreApplication::applicationDirPath();
-    tmpPath.append("/image/setpasswd.png");
-    qDebug() << "Image DirPath=" << tmpPath;
-    QAxObject* nlineShapes =  m_Selection->querySubObject("InlineShapes");
-    qDebug() << nlineShapes;
-    // dynamicCall 和 querySubObject方法均可调用AddPicture
-    const QVariant v1(false), v2(true), v3(0);
-    // QVariant shape = nlineShapes->dynamicCall("AddPicture(const QString&, const QVariant &, const QVariant &)", tmpPath, v1, v2, v3);
-    QAxObject* shape = nlineShapes->querySubObject("AddPicture(const QString&, const QVariant &, const QVariant &)", tmpPath, v1, v2, v3);
-    qDebug() << shape;
-    // 对象的 IDispatch 实现所暴露的属性可通过 Qt Object Model（Qt 对象模型）提供的属性系统进行读写（两个子类都是QObjects，因此可以使用QObject::setProperty() 和QObject::property() ）。
-    // 不支持带有多个参数的属性。
-    if( shape != nullptr){
-        int w = shape->property("Width").toInt();
-        int h = shape->property("Height").toInt();
-        qDebug() << w;
-        qDebug() << h;
-        shape->setProperty("Width", 400);
-        shape->setProperty("Height", 400);
-        shape->dynamicCall("Select()");
-    }
-}
+    // // 4.  文档中插入图片
+    // QString tmpPath = QCoreApplication::applicationDirPath();
+    // tmpPath.append("/image/setpasswd.png");
+    // qDebug() << "Image DirPath=" << tmpPath;
+    // QAxObject* nlineShapes =  m_Selection->querySubObject("InlineShapes");
+    // qDebug() << nlineShapes;
+    // // dynamicCall 和 querySubObject方法均可调用AddPicture
+    // const QVariant v1(false), v2(true), v3(0);
+    // // QVariant shape = nlineShapes->dynamicCall("AddPicture(const QString&, const QVariant &, const QVariant &)", tmpPath, v1, v2, v3);
+    // QAxObject* shape = nlineShapes->querySubObject("AddPicture(const QString&, const QVariant &, const QVariant &)", tmpPath, v1, v2, v3);
+    // qDebug() << shape;
+    // // 对象的 IDispatch 实现所暴露的属性可通过 Qt Object Model（Qt 对象模型）提供的属性系统进行读写（两个子类都是QObjects，因此可以使用QObject::setProperty() 和QObject::property() ）。
+    // // 不支持带有多个参数的属性。
+    // if( shape != nullptr){
+    //     int w = shape->property("Width").toInt();
+    //     int h = shape->property("Height").toInt();
+    //     qDebug() << w;
+    //     qDebug() << h;
+    //     shape->setProperty("Width", 400);
+    //     shape->setProperty("Height", 400);
+    //     shape->dynamicCall("Select()");
+    // }
 
+    // // 5. 设置段落字体
+    // QAxObject* font = m_Selection->querySubObject("Font");
+    // qDebug() << font;
+    // font->setProperty("Size", 10);
+    // font->setProperty("Name", "幼圆");
+    // // font->setProperty("Name", "黑体");
+    // // BGR
+    // font->setProperty("Color", 0xFF0000);
+    // // 添加下划线
+    // font->setProperty("Underline", true);
+
+    // m_Selection->dynamicCall("TypeParagraph");
+    // // 获取选择区域 Range不适用段落 代表文档中的一个连续范围
+    // // QAxObject* range = m_Selection->querySubObject("Range");
+    // // range->setProperty("Bold", true);
+
+    // QString txt = "从明天起，做一个幸福的人。喂马，劈柴，周游世界。从明天起，关心粮食和蔬菜。我有一所房子，面朝大海，春暖花开。";
+    // m_Selection->dynamicCall("TypeText(const QString&)", txt);
+
+    // // ParagraphFormat
+    // QAxObject* paragraphformat = m_Selection->querySubObject("ParagraphFormat");
+    // // 靠左对齐
+    // paragraphformat->setProperty("Alignment", 0);
+    // // 段落缩进2个字符
+    // paragraphformat->dynamicCall("IndentFirstLineCharWidth(int)", 2);
+
+    // // 字体还原
+    // font->setProperty("Color", 0x000000);
+    // font->setProperty("Underline", false);
+
+    // // 6. 设置页眉页脚
+    // QAxObject* window = m_axWdiget->querySubObject("ActiveWindow");
+    // qDebug() << "window->" << window;
+    // QAxObject* pane = window->querySubObject("ActivePane");
+    // qDebug() << "pane->" << pane;
+    // QAxObject* view = pane->querySubObject("View");     
+    // qDebug() << "view->" << view;
+
+    // // 进入设置页眉视图
+    // view->setProperty("SeekView", 9);
+    // // 居中对齐
+    // m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+    // QString txt = "研发中心编制";
+    // m_Selection->dynamicCall("TypeText(const QString&)", txt);
+    // // 进入正文编辑
+    // view->setProperty("SeekView", 0);
+
+    // // 进入设置页脚视图
+    // view->setProperty("SeekView", 10);
+    // // 居中对齐
+    // m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
+    // m_Selection->dynamicCall("TypeText(const QString&)", "-");
+    // QAxObject* fields = m_Document->querySubObject("Fields");
+    // QAxObject* range = m_Selection->querySubObject("Range");
+    // fields->dynamicCall("Add(const QVariant &, int, const QString&, bool)", range->asVariant(), 33, "PAGE ", FALSE);
+    // m_Selection->dynamicCall("TypeText(const QString&)", "-");
+    // // 进入正文编辑
+    // view->setProperty("SeekView", 0);
+
+    // 7. 文档另存为
+}

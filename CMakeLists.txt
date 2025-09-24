@@ -29,6 +29,7 @@ set(SRC
     src/Main.cpp
     src/MainWindow.cpp
     src/FunctionWidget.cpp
+    src/Tools.cpp
     icon.rc
 )
 

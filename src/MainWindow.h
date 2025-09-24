@@ -34,8 +34,10 @@ private:
 public slots:
     void onNew();
     void onOpen();
-    void onShowCatalog();
+    void onAddTable();
     void onTypeText();
+    void onStringReplace();
     void onAddPicture();
+    void onAddHeadFoot();
     void onFunctionInvoke();
 };
