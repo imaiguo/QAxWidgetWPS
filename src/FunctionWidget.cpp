@@ -43,6 +43,16 @@ bool FunctionWidget::initUI(){
     m_AddHeadFoot->move(10, height);
 
     height += 30;
+    m_AddHeadLine1 = new QPushButton(this);
+    m_AddHeadLine1 ->setText("插入标题1");
+    m_AddHeadLine1->move(10, height);
+
+    height += 30;
+    m_AddHeadLine2 = new QPushButton(this);
+    m_AddHeadLine2 ->setText("插入标题2");
+    m_AddHeadLine2->move(10, height);
+
+    height += 30;
     m_StringReplace = new QPushButton(this);
     m_StringReplace ->setText("查找替换");
     m_StringReplace->move(10, height);
@@ -62,6 +72,8 @@ void FunctionWidget::addConnection(){
     connect(m_Open, &QPushButton::clicked, this, [&]()-> void { emit Open();});
     connect(m_AddTable, &QPushButton::clicked, this, [&]()-> void { emit AddTable();});
     connect(m_AddHeadFoot, &QPushButton::clicked, this, [&]()-> void { emit AddHeadFoot();});
+    connect(m_AddHeadLine1, &QPushButton::clicked, this, [&]()-> void { emit AddHeadLine1();});
+    connect(m_AddHeadLine2, &QPushButton::clicked, this, [&]()-> void { emit AddHeadLine2();});
     connect(m_StringInsert, &QPushButton::clicked, this, [&]()-> void { emit StringInsert();});
     connect(m_StringReplace, &QPushButton::clicked, this, [&]()-> void { emit StringReplace();});
     connect(m_AddPicture, &QPushButton::clicked, this, [&]()-> void { emit AddPicture();});

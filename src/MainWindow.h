@@ -40,4 +40,6 @@ public slots:
     void onAddPicture();
     void onAddHeadFoot();
     void onFunctionInvoke();
+    void onAddHeadLine1();
+    void onAddHeadLine2();
 };

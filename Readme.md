@@ -13,10 +13,6 @@
 
 - Application
 
-
-
-
-
 ## 注册ocx控件
 
 ```bash
@@ -25,19 +21,17 @@
 >
 ```
 
-
 ## 参考
 
 - Active Qt https://doc.qt.io/qt-6/activeqt-index.html
+- QAxBase Class https://doc.qt.io/qt-6/zh/qaxbase.html
 - QAxWidget Class https://doc.qt.io/qt-6/qaxwidget.html
+
 - WPS二次开发 https://gitee.com/zouyf/wps/tree/master
-- C++ WPS二次开发资料汇总 https://gitcode.com/open-source-toolkit/54081 https://blog.csdn.net/gitblog_09705/article/details/142949698
+- C++ WPS二次开发资料汇总 https://gitcode.com/open-source-toolkit/54081 https://gitcode.com/open-source-toolkit/54081
 - Qt/C++操作word文档 https://blog.csdn.net/weixin_42214392/article/details/141925713
 - Qt窗口内嵌Word，PPT，Excel https://blog.csdn.net/a379039233/article/details/122838893
 - 使用VS2008通过C++在WPS文档中添加内容的实践指南 https://blog.csdn.net/weixin_30798867/article/details/147543302
-- "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\ksaddndr.dll"
-- "C:\Users\ephraim\AppData\Local\kingsoft\WPS Office\12.1.0.22529\office6\wppcore.dll"
-- Qt调用OCX控件详解 https://www.freesion.com/article/58432624174
-- QAxBase Class https://doc.qt.io/qt-6/zh/qaxbase.html
-- https://blog.csdn.net/ribavnu/article/details/51437052
+- PostMessage 向Windows窗口发送Alt组合键 https://blog.csdn.net/ribavnu/article/details/51437052
 - Virtual-Key 代码 https://learn.microsoft.com/zh-cn/windows/win32/inputdev/virtual-key-codes
+- WdBuiltinStyle枚举 https://qn.cache.wpscdn.cn/encs/doc/office_v11/index.htm?page=Java%20%E5%BA%94%E7%94%A8%E9%9B%86%E6%88%90%20WPS%20%E6%8C%87%E5%8D%97/%E6%96%87%E5%AD%97%20API%20%E5%8F%82%E8%80%83/%E6%9E%9A%E4%B8%BE/WdBuiltinStyle%20%E6%9E%9A%E4%B8%BE.htm

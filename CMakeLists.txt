@@ -15,7 +15,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_PREFIX_PATH "D:/devtools/Qt.6.9.1/lib/cmake")
 # set(CMAKE_PREFIX_PATH "D:/devtools/Qt.6.9.1/static/lib/cmake")
 
-
 project(${APPNAME} LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
@@ -44,4 +43,4 @@ target_link_libraries(${APPNAME} PRIVATE
 )
 
 file(COPY doc/测试文档.docx DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/doc)
-file(COPY image/setpasswd.png DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/image)
+file(COPY image/Gfp-wisconsin-madison-the-nature-boardwalk.jpg DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/image)

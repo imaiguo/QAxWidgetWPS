@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QCoreApplication>
 #include <QKeyEvent>
+#include <QFileDialog>
 
 #include <Windows.h>
 
@@ -104,7 +105,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
         ShowWindow(m_hWps, SW_HIDE);
         QAxObject* documents = m_axWdiget->querySubObject("Documents");
         if(!documents->isNull())
-            documents->querySubObject("Close(const QString&)", "wpsDoNotSaveChanges");
+            documents->dynamicCall("Close(int)", 0);
         m_axWdiget->dynamicCall("Quit()");
     }
 
@@ -126,19 +127,21 @@ void MainWindow::addConnection(){
     connect(m_Funtion, &FunctionWidget::StringReplace, this, &MainWindow::onStringReplace);
     connect(m_Funtion, &FunctionWidget::AddPicture, this, &MainWindow::onAddPicture);
     connect(m_Funtion, &FunctionWidget::FunctionInvoke, this, &MainWindow::onFunctionInvoke);
-    connect(m_Funtion, &FunctionWidget::AddHeadFoot, this, &MainWindow::onAddHeadFoot);
+    connect(m_Funtion, &FunctionWidget::AddHeadLine1, this, &MainWindow::onAddHeadLine1);
+    connect(m_Funtion, &FunctionWidget::AddHeadLine2, this, &MainWindow::onAddHeadLine2);
 }
 
 void MainWindow::onNew(){
     qDebug() << "MainWindow::onNew";
-    m_Documents->querySubObject("Close(const QString&)", "wpsDoNotSaveChanges");
+    // 0关闭时不保存 1关闭时提示保存 2关闭时保存
+    m_Documents->dynamicCall("Close(int)", 0);
     m_Document = m_Documents->querySubObject("Add");
     m_Selection = m_axWdiget->querySubObject("Selection");
 }
 
 void MainWindow::onOpen(){
     qDebug() << "MainWindow::onOpen";
-    m_Documents->querySubObject("Close(const QString&)", "wpsDoNotSaveChanges");
+    m_Documents->dynamicCall("Close(int)", 0);
     QString tmpPath = QCoreApplication::applicationDirPath();
     qDebug() << "applicationDirPath=" << tmpPath;
     tmpPath.append("/doc/测试文档.docx");
@@ -205,7 +208,7 @@ void MainWindow::onAddTable(){
 }
 
 void MainWindow::onTypeText(){
- QAxObject* font = m_Selection->querySubObject("Font");
+    QAxObject* font = m_Selection->querySubObject("Font");
     qDebug() << font;
     font->setProperty("Size", 10);
     font->setProperty("Name", "幼圆");
@@ -235,7 +238,6 @@ void MainWindow::onTypeText(){
         m_Selection->dynamicCall("TypeText(const QString&)", tmp);
     }
 
-
     // ParagraphFormat
     QAxObject* paragraphformat = m_Selection->querySubObject("ParagraphFormat");
     // 0 靠左对齐 1剧中对齐 2 靠右对齐
@@ -255,7 +257,7 @@ void MainWindow::onAddPicture(){
     m_Selection->querySubObject("Paragraphs")->setProperty("Alignment", 1);
 
     QString tmpPath = QCoreApplication::applicationDirPath();
-    tmpPath.append("/image/setpasswd.png");
+    tmpPath.append("/image/Gfp-wisconsin-madison-the-nature-boardwalk.jpg");
     qDebug() << "Image DirPath=" << tmpPath;
     QAxObject* nlineShapes =  m_Selection->querySubObject("InlineShapes");
     qDebug() << nlineShapes;
@@ -285,6 +287,9 @@ void MainWindow::onAddHeadFoot(){
     QAxObject* view = pane->querySubObject("View");     
     qDebug() << "view->" << view;
 
+    if(view == nullptr)
+        return;
+
     // 进入设置页眉视图
     view->setProperty("SeekView", 9);
     // 居中对齐
@@ -312,6 +317,20 @@ void MainWindow::onStringReplace(){
     QVariant name = m_Document->property("FullName");
     qDebug() << name.toString();
     QAxObject* find = m_Selection->querySubObject("Find");
+    if(find == nullptr)
+        return;
+
+    // // 进入设置页眉页脚视图
+    // QAxObject* window = m_axWdiget->querySubObject("ActiveWindow");
+    // qDebug() << "window->" << window;
+    // QAxObject* pane = window->querySubObject("ActivePane");
+    // qDebug() << "pane->" << pane;
+    // QAxObject* view = pane->querySubObject("View");     
+    // qDebug() << "view->" << view;
+    // // 进入设置页眉视图
+    // view->setProperty("SeekView", 9);
+    // // 进入设置页脚视图
+    // view->setProperty("SeekView", 10);
 
     // 方法1 循环查找
     find->setProperty("Text", "待替换文字");
@@ -324,6 +343,9 @@ void MainWindow::onStringReplace(){
     if(result.toBool()){
         m_Selection->dynamicCall("TypeText(const QString&)", "大家好");
     }
+
+    // // 进入正文编辑
+    // view->setProperty("SeekView", 0);
 
     // // 方法2 14个参数
     // // Execute(FindText, MatchCase, MatchWholeWord, MatchWildcards, MatchSoundsLike, MatchAllWordForms, Forward, Format, ReplaceWith, Replace, MatchKashida, MatchDiacritics, MatchAlefHamza, MatchControl)
@@ -348,6 +370,24 @@ void MainWindow::onStringReplace(){
     // vars.append(QVariant(false));//MatchControl
     // QVariant result = find->dynamicCall("Execute(const QString&, bool, bool, bool, bool, bool, bool, bool, const QVariant &, int, bool, bool, bool, bool)", vars);
     // qDebug() << result.toBool();
+}
+
+void MainWindow::onAddHeadLine1(){
+    // -1正文 -2Head1 -3Head2 ... -10Head9
+    QAxObject* style = m_Selection->querySubObject("Style");
+    style->setProperty("NextParagraphStyle", -2);
+    m_Selection->dynamicCall("TypeParagraph");
+    m_Selection->dynamicCall("TypeText(const QString&)", "壹级标题");
+
+    QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+    QAxObject* tables = doc->querySubObject("TablesOfContents");
+}
+
+void MainWindow::onAddHeadLine2(){
+    QAxObject* style = m_Selection->querySubObject("Style");
+    style->setProperty("NextParagraphStyle", -3);
+    m_Selection->dynamicCall("TypeParagraph");
+    m_Selection->dynamicCall("TypeText(const QString&)", "贰级标题");
 }
 
 void MainWindow::onFunctionInvoke(){
@@ -451,4 +491,10 @@ void MainWindow::onFunctionInvoke(){
     // view->setProperty("SeekView", 0);
 
     // 7. 文档另存为
+    QString selectDir = QFileDialog::getExistingDirectory();
+    qDebug() << "Dir Path:" << selectDir;
+    QString dateTimeString = QDateTime::currentDateTime().toString("yyyyMMdd.hhmmss");
+    selectDir += "/实验笔记." + dateTimeString + ".docx";
+    QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+    doc->dynamicCall("SaveAs(const QString&)", selectDir);
 }

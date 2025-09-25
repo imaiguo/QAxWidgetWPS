@@ -22,6 +22,8 @@ signals:
     void StringReplace();
     void StringInsert();
     void AddPicture();
+    void AddHeadLine1();
+    void AddHeadLine2();
     void FunctionInvoke();
 
 private:
@@ -35,7 +37,8 @@ private:
     QPushButton * m_StringReplace;
     QPushButton * m_AddPicture;
     QPushButton * m_AddHeadFoot;
-    
+    QPushButton * m_AddHeadLine1;
+    QPushButton * m_AddHeadLine2;
     QPushButton * m_FunctionInvoke;
 };
 
