@@ -129,6 +129,7 @@ void MainWindow::addConnection(){
     connect(m_Funtion, &FunctionWidget::FunctionInvoke, this, &MainWindow::onFunctionInvoke);
     connect(m_Funtion, &FunctionWidget::AddHeadLine1, this, &MainWindow::onAddHeadLine1);
     connect(m_Funtion, &FunctionWidget::AddHeadLine2, this, &MainWindow::onAddHeadLine2);
+    connect(m_Funtion, &FunctionWidget::AddHeadFoot, this, &MainWindow::onAddHeadFoot);
 }
 
 void MainWindow::onNew(){
@@ -279,7 +280,7 @@ void MainWindow::onAddPicture(){
 }
 
 void MainWindow::onAddHeadFoot(){
-    // 6. 设置页眉页脚
+    // 设置页眉页脚
     QAxObject* window = m_axWdiget->querySubObject("ActiveWindow");
     qDebug() << "window->" << window;
     QAxObject* pane = window->querySubObject("ActivePane");
@@ -378,9 +379,6 @@ void MainWindow::onAddHeadLine1(){
     style->setProperty("NextParagraphStyle", -2);
     m_Selection->dynamicCall("TypeParagraph");
     m_Selection->dynamicCall("TypeText(const QString&)", "壹级标题");
-
-    QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
-    QAxObject* tables = doc->querySubObject("TablesOfContents");
 }
 
 void MainWindow::onAddHeadLine2(){
@@ -491,10 +489,89 @@ void MainWindow::onFunctionInvoke(){
     // view->setProperty("SeekView", 0);
 
     // 7. 文档另存为
+    // QString selectDir = QFileDialog::getExistingDirectory();
+    // if(selectDir.length() > 0){
+    //     QString dateTimeString = QDateTime::currentDateTime().toString("yyyyMMdd.hhmmss");
+    //     selectDir += "/实验笔记." + dateTimeString + ".docx";
+    //     qDebug() << "Dir Saved Path:" << selectDir;
+    //     QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+    //     doc->dynamicCall("SaveAs(const QString&)", selectDir);
+    // }
+
+    // 8. 获取文档中所有文本
+    // QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+    // QAxObject* range = doc->querySubObject("Content");
+    // QVariant text = range->property("Text");
+    // qDebug() << text.toString();
+
+    // 9. 获取文档中所有的段落
+    // QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+    // QAxObject* paras = doc->querySubObject("Paragraphs");
+    // QVariant count =  paras->dynamicCall("Count()");
+    // qDebug() << "总共: [" << count.toInt() << "]段。";
+
+    // 9.1 获取段落文本
+    // for(int i = 1; i< count.toInt() + 1; i++){
+    //     // Item数组首个元素从1开始, 不是0
+    //     QAxObject* para = paras->querySubObject("Item(int)", i);
+    //     QAxObject* range = para->querySubObject("Range");
+    //     QVariant text = range->property("Text");
+    //     qDebug() << text.toString();
+    //     qDebug() << "------------------------------------------------------------";
+    // }
+
+    // // 9.2 获取段落中的所有图片 并拷贝到剪切板
+    // // WdInlineShapeType 枚举
+    // // wdInlineShapePicture	3	图片。
+    // for(int i = 1; i< count.toInt() + 1; i++){
+    //     QAxObject* para = paras->querySubObject("Item(int)", i);
+    //     QAxObject* range = para->querySubObject("Range");
+    //     range->dynamicCall("Select()");
+    //     QAxObject* shapes =  m_Selection->querySubObject("InlineShapes");
+    //     QVariant c = shapes->property("Count");
+    //     qDebug() << "Shapes count->[" << c.toInt() << "]";
+    //     for( int j = 0; j < c.toInt(); j++){
+    //         QAxObject* shape = shapes->querySubObject("Item(int)", j+1);
+    //         QVariant type = shape->property("Type");
+    //         // 3 图片
+    //         qDebug() << "Shape type->[" << type.toInt() << "]";
+    //         shape->dynamicCall("Select()");
+    //         m_Selection->dynamicCall("Copy()");
+    //     }
+    //     qDebug() << "------------------------------------------------------------";
+    // }
+
+    // 10. 保存为pdf
+    // WdSaveFormat 枚举
+    // wdFormatPDF	17	PDF 格式。
+    // wdFormatTemplate97	1	WPS 97 模板格式。
+    // wdFormatXMLDocument	12	XML 文档格式。
+    // wdFormatXMLDocumentMacroEnabled	13	启用了宏的 XML 文档格式。
+    // wdFormatXMLTemplate	14	XML 模板格式。
+    // wdFormatXMLTemplateMacroEnabled	15	启用了宏的 XML 模板格式。
+    // wdFormatXPS	18	XPS 格式。
     QString selectDir = QFileDialog::getExistingDirectory();
-    qDebug() << "Dir Path:" << selectDir;
-    QString dateTimeString = QDateTime::currentDateTime().toString("yyyyMMdd.hhmmss");
-    selectDir += "/实验笔记." + dateTimeString + ".docx";
-    QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
-    doc->dynamicCall("SaveAs(const QString&)", selectDir);
+    if(selectDir.length() > 0){
+        QString dateTimeString = QDateTime::currentDateTime().toString("yyyyMMdd.hhmmss");
+        selectDir += "/实验笔记." + dateTimeString + ".pdf";
+        qDebug() << "Dir Saved Path:" << selectDir;
+        QAxObject* doc = m_axWdiget->querySubObject("ActiveDocument");
+        // QVariant v1(selectDir);
+        QVariant name =  doc->property("FullName");
+        qDebug() << name.toString();
+
+        // 10.1 保存为DPF
+        doc->dynamicCall("SaveAs(const QString&, int)", selectDir, 17);
+
+        // // 10.2保存PDF带密码只读格式
+        // QVariantList args;
+        // args.append(QVariant(selectDir));//FileName
+        // args.append(QVariant(17));//FileFormat
+        // args.append(QVariant(false));//LockComments
+        // args.append(QVariant("password"));//Password
+        // args.append(QVariant(false));//AddToRecentFiles
+        // args.append(QVariant("wpassword"));//WritePassword
+        // args.append(QVariant(true));//ReadOnlyRecommended
+        // doc->dynamicCall("SaveAs(const QString&, int, bool, const QString&, bool, const QString&, bool)", args);
+    }
 }
